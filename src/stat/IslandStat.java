@@ -4,14 +4,15 @@ import configuration.Settings;
 import entity.Island;
 import entity.Location;
 import util.UnitType;
+
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class IslandStat implements Runnable {
-   private Island island;
-   private HashMap<UnitType, Integer> statIsland = new HashMap<>();
-   public AtomicInteger count = new AtomicInteger(0);
+    private Island island;
+    private HashMap<UnitType, Integer> statIsland = new HashMap<>();
+    public AtomicInteger count = new AtomicInteger(0);
 
 
     public IslandStat(Island island) {
@@ -19,19 +20,21 @@ public class IslandStat implements Runnable {
         initialMap();
     }
 
-    private void initialMap(){
+    private void initialMap() {
         Set<UnitType> unitTypes = Settings.maxCountUnit.keySet();
-        for (UnitType type : unitTypes){
-            statIsland.put(type,0);
+        for (UnitType type : unitTypes) {
+            statIsland.put(type, 0);
         }
     }
 
     public void printStatisticIsland() {
         islandWalking();
         System.out.println(statIsland);
+        statIsland.clear();
+        initialMap();
     }
 
-    private void islandWalking(){
+    private void islandWalking() {
         Location[][] locations = island.getLocations();
         for (int i = 0; i < locations.length; i++) {
             for (int j = 0; j < locations[i].length; j++) {
@@ -40,18 +43,18 @@ public class IslandStat implements Runnable {
         }
     }
 
-    private void fillInMap(Location location){
+    private void fillInMap(Location location) {
         Set<UnitType> unitTypes = statIsland.keySet();
-        for (UnitType type : unitTypes){
-            statIsland.put(type,statIsland.get(type) + location.countUnitLocation(type));
+        for (UnitType type : unitTypes) {
+            statIsland.put(type, statIsland.get(type) + location.countUnitLocation(type));
         }
     }
 
     @Override
     public void run() {
-        if(count.get() == Settings.x*Settings.y) {
-            printStatisticIsland();
-            count = new AtomicInteger(0);
-        }
+        count.incrementAndGet();
+        System.out.println("-".repeat(50) + "Прощел день: " + count.get() + "-".repeat(50));
+        printStatisticIsland();
+
     }
 }

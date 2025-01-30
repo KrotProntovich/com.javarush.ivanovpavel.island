@@ -78,7 +78,7 @@ public abstract class Animal extends Unit {
     // метод размножаться
     public void reproduce(Location location) {
             Animal unit = searchPartner(location);
-            if (unit != null) {
+            if (unit != null && location.countUnitLocation(this.getType())<Settings.maxCountUnit.get(this.getType())) {
                 location.getUnitList().add(location.getFactory().createAnimal(this.getType()));
                 // проверка
                 //System.out.print(this.toString() + " размножился с " + unit.toString()+ " ");

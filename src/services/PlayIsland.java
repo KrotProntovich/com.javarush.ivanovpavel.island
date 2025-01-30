@@ -1,3 +1,5 @@
+package services;
+
 import entity.Island;
 import entity.Location;
 import stat.IslandStat;
@@ -23,16 +25,18 @@ public class PlayIsland {
         for (int i = 0; i < locations.length; i++) {
             for (int j = 0; j < locations[i].length; j++) {
                 PlantsTasks plantsTasks = new PlantsTasks(locations[i][j], locations[i][j].countUnitLocation(UnitType.PLANT));
-                executor.scheduleWithFixedDelay(plantsTasks, 0L, 2L, TimeUnit.SECONDS);
-                executor.scheduleWithFixedDelay(locations[i][j], 0L, 2L, TimeUnit.SECONDS);
+                executor.scheduleWithFixedDelay(plantsTasks, 0L, 3L, TimeUnit.SECONDS);
+                executor.scheduleWithFixedDelay(locations[i][j], 0L, 3L, TimeUnit.SECONDS);
             }
         }
-        executor.scheduleWithFixedDelay(islandStat,2L,2L, TimeUnit.SECONDS);
+        executor.scheduleWithFixedDelay(islandStat, 2L, 3L, TimeUnit.SECONDS);
         try {
             island.doneSignal.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        executor.close();
+        executor.shutdown();
+        System.out.println("-".repeat(50) + "Прощел день: " + islandStat.count.get() + "-".repeat(50));
+        islandStat.printStatisticIsland();
     }
 }
