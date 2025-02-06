@@ -7,6 +7,7 @@ import entity.unit.animal.predator.Wolf;
 import util.Direction;
 import util.UnitType;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -122,6 +123,7 @@ public abstract class Animal extends Unit {
             int x = coordinates[0];
             int y = coordinates[1];
             Location newlocation = locations[x][y];
+            newlocation.lock.lock();
             if (newlocation.countUnitLocation(this.getType()) < Settings.maxCountUnit.get(this.getType())) {
                 newlocation.getUnitList().add(this);
                 location.getUnitList().remove(this);
@@ -129,6 +131,8 @@ public abstract class Animal extends Unit {
                 //System.out.println(this.toString() + " переехал на " + newlocation.toString());
                 this.decreaseSatiety();
             }
+            newlocation.lock.unlock();
+
             // проверка
 //            else
 //                System.out.println(this.toString() + "На локации нет места");

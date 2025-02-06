@@ -7,27 +7,25 @@ import util.UnitType;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class PlantsTasks implements Runnable {
-    private Location location;
-    private int countPlants;
+    private Location[][] locations;
 
-    public PlantsTasks(Location location, int countPlants) {
-        this.location = location;
-        this.countPlants = countPlants;
+    public PlantsTasks(Location[][] locations) {
+        this.locations = locations;
     }
 
     public void doTasks(){
-        int countSpawn = ThreadLocalRandom.current().nextInt(1, 15);
-        if (countPlants+countSpawn < Settings.maxCountUnit.get(UnitType.PLANT)) {
-            for (int i = 0; i < countSpawn; i++) {
-                location.getUnitList().add(location.getFactory().createAnimal(UnitType.PLANT));
+        for (int i = 0; i < locations.length; i++) {
+            for (int j = 0; j < locations[i].length; j++) {
+                int countSpawn = ThreadLocalRandom.current().nextInt(1, 15);
+                int countPlants = locations[i][j].countUnitLocation(UnitType.PLANT);
+                if (countPlants+countSpawn < Settings.maxCountUnit.get(UnitType.PLANT)) {
+                    for (int k = 0; k < countSpawn; k++) {
+                        locations[i][j].getUnitList().add(locations[i][j].getFactory().createAnimal(UnitType.PLANT));
+                    }
+                }
+                //System.out.println("Добавленно:" + countSpawn + " растений");
             }
         }
-            //System.out.println("Добавленно:" + countSpawn + " растений");
-    }
-
-    @Override
-    public String toString() {
-        return "services.PlantsTasks";
     }
 
     @Override

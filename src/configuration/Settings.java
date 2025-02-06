@@ -8,7 +8,8 @@ public class Settings {
 
     public static int x = 100;// размер острова горизоталь
     public static int y = 20;// размер острова вертикаль
-    public static int day = 10;// продолжительность симуляции в днях
+    public static int day = 100;// продолжительность симуляции в днях
+    public static int countDown = (x*y)+1;
 
     public static int predator = 5;// начальное количество хищников каждого вида для каждой локации
     public static int herbivorous = 10;// начальне количество травоядных каждого вида для каждой локации

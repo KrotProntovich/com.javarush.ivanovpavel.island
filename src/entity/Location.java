@@ -5,16 +5,16 @@ import entity.unit.animal.Animal;
 import entity.unit.animal.herbivore.Herbivore;
 import entity.unit.animal.predator.*;
 import entity.unit.plant.Plant;
+import services.PlayIsland;
 import stat.IslandStat;
 import util.UnitFactory;
 import util.UnitType;
 import configuration.Settings;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Location implements Runnable {
     private int x;
@@ -22,14 +22,14 @@ public class Location implements Runnable {
     private UnitFactory factory;// фабрика полученная при создании острова
     private CopyOnWriteArrayList<Unit> unitList;// население
     private Location[][] locations;
-    private CountDownLatch doneSignal;
+    public ReentrantLock lock;
 
-    public Location(int x, int y, UnitFactory factory, Location[][] locations, CountDownLatch doneSignal) {
+    public Location(int x, int y, UnitFactory factory, Location[][] locations, ReentrantLock lock) {
         this.x = x;
         this.y = y;
         this.factory = factory;
         this.locations = locations;
-        this.doneSignal = doneSignal;
+        this.lock = lock;
         initializationUnitList();
         //System.out.println("Рождение: " + toString());
     }
@@ -53,7 +53,7 @@ public class Location implements Runnable {
     public void initializationUnitList() {
         unitList = new CopyOnWriteArrayList<>();
         Set<UnitType> unitTypes = Settings.maxCountUnit.keySet();
-        for(UnitType type : unitTypes) {
+        for (UnitType type : unitTypes) {
             Unit unit = factory.createAnimal(type);
             if (unit instanceof Predator) {
                 unitList.add(unit);
@@ -76,12 +76,12 @@ public class Location implements Runnable {
         }
     }
 
-    public int countUnitLocation(UnitType type){
-        AtomicInteger countType = new AtomicInteger(0);
-        for (int i = 0; i < unitList.size(); i++) {
-            if (unitList.get(i).getType().equals(type)) countType.getAndIncrement();
-        }
-        return countType.get();
+    public int countUnitLocation(UnitType type) {
+        int countType = 0;
+            for (int i = 0; i < unitList.size()-1; i++) {
+                if (unitList.get(i).getType().equals(type)) countType++;
+            }
+        return countType;
     }
 
     @Override
@@ -94,20 +94,20 @@ public class Location implements Runnable {
         ConcurrentLinkedQueue<Animal> que = new ConcurrentLinkedQueue<>();
         //System.out.println("-".repeat(50)+Thread.currentThread().getName() + this.toString());
         for (int i = 0; i < unitList.size(); i++) {
-            if(unitList.get(i) instanceof Animal animal){
+            if (unitList.get(i) instanceof Animal animal) {
                 que.add(animal);
             }
         }
-        while (que.size()>0) {
+        while (que.size() > 0) {
             Animal poll;
-            if((poll = que.poll())!=null) {
+            if ((poll = que.poll()) != null) {
                 if (!poll.die(this) && !poll.isEaten()) {
                     if (poll.eat(this)) poll.reproduce(this);
                     poll.move(this, locations);
                 }
             }
         }
-        System.out.println(this.toString() + unitList);
-        doneSignal.countDown();
+        //System.out.println(this.toString() + unitList);
+        PlayIsland.doneSignal.countDown();
     }
 }
